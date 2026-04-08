@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUNDAPP — Script SQL v5.1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0f0; line-height: 1.6; }
+
+  header { background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 100%); padding: 2rem 2.5rem; border-bottom: 1px solid #3a2a7a; }
+  header h1 { font-size: 2rem; color: #a78bfa; font-weight: 700; letter-spacing: 1px; }
+  header p  { color: #9090b0; font-size: 0.95rem; margin-top: 0.3rem; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+  .badge { font-size: 0.78rem; padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+  .b-purple { background: #3b2a7a; color: #c4b5fd; }
+  .b-blue   { background: #1e3a5f; color: #93c5fd; }
+  .b-green  { background: #1a3a2a; color: #6ee7b7; }
+  .b-red    { background: #3a1a2a; color: #fca5a5; }
+  .b-yellow { background: #3a2a10; color: #fcd34d; }
+  .b-teal   { background: #0f3a3a; color: #5eead4; }
+
+  .toc { background: #161628; border: 1px solid #2a2a4a; border-radius: 10px; padding: 1.5rem; margin: 2rem 2.5rem; }
+  .toc h2 { font-size: 1rem; color: #a78bfa; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; }
+  .toc a { color: #9090c0; font-size: 0.9rem; text-decoration: none; padding: 4px 8px; border-radius: 6px; display: block; }
+  .toc a:hover { background: #2a2a4a; color: #c4b5fd; }
+
+  main { padding: 0 2.5rem 3rem; max-width: 1100px; margin: 0 auto; }
+
+  .section { margin: 2.5rem 0; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid #2a2a4a; }
+  .section-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .icon-purple { background: #3b2a7a; }
+  .icon-blue   { background: #1e3a5f; }
+  .icon-green  { background: #1a3a2a; }
+  .icon-red    { background: #3a1a2a; }
+  .icon-yellow { background: #3a2a10; }
+  .icon-teal   { background: #0f3a3a; }
+  .icon-gray   { background: #2a2a3a; }
+  .section-title { font-size: 1.2rem; color: #e0e0f0; font-weight: 600; }
+  .section-sub   { font-size: 0.85rem; color: #6060a0; margin-left: auto; }
+
+  pre { background: #0a0a18; border: 1px solid #2a2a4a; border-radius: 8px; padding: 1.2rem 1.5rem; overflow-x: auto; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.82rem; line-height: 1.7; }
+
+  .kw  { color: #a78bfa; font-weight: 600; }
+  .kw2 { color: #818cf8; }
+  .typ { color: #34d399; }
+  .str { color: #fbbf24; }
+  .com { color: #4a5568; font-style: italic; }
+  .fn  { color: #60a5fa; }
+  .sc  { color: #f472b6; }
+  .num { color: #fb923c; }
+  .con { color: #f9a8d4; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 1.5rem 0; }
+  .stat-card { background: #161628; border: 1px solid #2a2a4a; border-radius: 8px; padding: 1rem; text-align: center; }
+  .stat-card .num-big { font-size: 2rem; font-weight: 700; color: #a78bfa; }
+  .stat-card .label   { font-size: 0.78rem; color: #6060a0; margin-top: 4px; }
+
+  footer { text-align: center; padding: 2rem; color: #3a3a6a; font-size: 0.85rem; border-top: 1px solid #1a1a3a; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⬡ FUNDAPP</h1>
+  <p>Script DDL completo para Supabase (PostgreSQL) — Versión 5.1</p>
+  <div class="badge-row">
+    <span class="badge b-purple">🔵 Voluntariado</span>
+    <span class="badge b-yellow">🟡 Usuarios</span>
+    <span class="badge b-red">🔴 Coordinación</span>
+    <span class="badge b-green">🟢 Donaciones</span>
+    <span class="badge b-teal">🟣 Ubicaciones</span>
+    <span class="badge b-blue">🔒 Seguridad</span>
+  </div>
+</header>
+
+<div class="toc">
+  <h2>Contenido</h2>
+  <div class="toc-grid">
+    <a href="#ext">0. Extensión requerida</a>
+    <a href="#schemas">1. Schemas</a>
+    <a href="#tablas">2. Tablas</a>
+    <a href="#indices">3. Índices</a>
+    <a href="#ins-ubicaciones">4. Datos — Ubicaciones</a>
+    <a href="#ins-roles">5. Datos — Roles</a>
+    <a href="#ins-usuarios">6. Datos — Usuarios</a>
+    <a href="#ins-roles-usuarios">7. Datos — Roles × Usuarios</a>
+    <a href="#ins-coordinadores">8. Datos — Coordinadores</a>
+    <a href="#ins-actividades">9. Datos — Actividades</a>
+    <a href="#ins-voluntarios">10. Datos — Voluntarios</a>
+    <a href="#ins-metodo-pago">11. Datos — Métodos de Pago</a>
+    <a href="#ins-donante">12. Datos — Donantes</a>
+    <a href="#ins-donaciones">13. Datos — Donaciones</a>
+    <a href="#ins-postulaciones">14. Datos — Postulaciones</a>
+    <a href="#ins-certificados">15. Datos — Certificados</a>
+    <a href="#ins-notificaciones">16. Datos — Notificaciones</a>
+    <a href="#ins-auditoria">17. Datos — Auditoría</a>
+  </div>
+</div>
+
+<main>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num-big">6</div><div class="label">Schemas</div></div>
+    <div class="stat-card"><div class="num-big">16</div><div class="label">Tablas</div></div>
+    <div class="stat-card"><div class="num-big">13</div><div class="label">Índices</div></div>
+    <div class="stat-card"><div class="num-big">14</div><div class="label">Tablas con datos</div></div>
+    <div class="stat-card"><div class="num-big">20</div><div class="label">Usuarios</div></div>
+    <div class="stat-card"><div class="num-big">30</div><div class="label">Actividades</div></div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       0. EXTENSIÓN
+  ════════════════════════════════════════════════ -->
+  <div class="section" id="ext">
+    <div class="section-header">
+      <div class="section-icon icon-gray">🔧</div>
+      <span class="section-title">0. Extensión requerida</span>
+    </div>
+<pre><span class="kw">CREATE EXTENSION IF NOT EXISTS</span> pgcrypto;</pre>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       1. SCHEMAS
+  ════════════════════════════════════════════════ -->
+  <div class="section" id="schemas">
+    <div class="section-header">
+      <div class="section-icon icon-purple">📦</div>
+      <span class="section-title">1. Schemas</span>
+    </div>
+<pre><span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">voluntariado</span>;   <span class="com">-- Módulo Voluntariado</span>
+<span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">ubicaciones</span>;    <span class="com">-- Módulo Ubicaciones</span>
+<span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">usuarios</span>;       <span class="com">-- Módulo Usuarios</span>
+<span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">coordinacion</span>;   <span class="com">-- Módulo Coordinación</span>
+<span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">donaciones</span>;     <span class="com">-- Módulo Donaciones</span>
+<span class="kw">CREATE SCHEMA IF NOT EXISTS</span> <span class="sc">seguridad</span>;      <span class="com">-- Auditoría y seguridad transversal</span></pre>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       2. TABLAS
+  ════════════════════════════════════════════════ -->
+  <div class="section" id="tablas">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🗄</div>
+      <span class="section-title">2. Tablas</span>
+      <span class="section-sub">orden según dependencias FK</span>
+    </div>
+
+    <!-- seguridad.auditoria -->
+<pre><span class="com">-- ─── SEGURIDAD (sin dependencias externas — va primero) ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">seguridad</span>.auditoria (
+    idauditoria  <span class="typ">SERIAL</span>       <span class="kw2">PRIMARY KEY</span>,
+    idusuario    <span class="typ">INT</span>          <span class="kw2">NULL</span>,
+    accion       <span class="typ">VARCHAR(50)</span>  <span class="kw2">NOT NULL</span>,
+    esquema      <span class="typ">VARCHAR(50)</span>  <span class="kw2">NOT NULL</span>,
+    tabla        <span class="typ">VARCHAR(100)</span> <span class="kw2">NOT NULL</span>,
+    fecha        <span class="typ">TIMESTAMP</span>    <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">NOW</span>(),
+    descripcion  <span class="typ">TEXT</span>         <span class="kw2">NULL</span>,
+
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_audit_accion</span> <span class="kw2">CHECK</span> (accion <span class="kw2">IN</span> (<span class="str">'INSERT'</span>,<span class="str">'UPDATE'</span>,<span class="str">'DELETE'</span>,<span class="str">'LOGIN'</span>,<span class="str">'LOGOUT'</span>,<span class="str">'EXPORT'</span>))
+);</pre>
+
+    <!-- ubicaciones -->
+<pre><span class="com">-- ─── 🟣 MÓDULO UBICACIONES ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">ubicaciones</span>.ubicaciones (
+    idubicaciones        <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    nombreubicacion      <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    direccionubicacion   <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    cuposdisponibles     <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_ubicacion_nombre</span>    <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(nombreubicacion)) &gt;= <span class="num">2</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_ubicacion_direccion</span> <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(direccionubicacion)) &gt;= <span class="num">3</span>)
+);</pre>
+
+    <!-- usuarios -->
+<pre><span class="com">-- ─── 🟡 MÓDULO USUARIOS ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">usuarios</span>.usuarios (
+    idusuarios       <span class="typ">SERIAL</span>       <span class="kw2">PRIMARY KEY</span>,
+    nombrecompleto   <span class="typ">VARCHAR(45)</span>  <span class="kw2">NOT NULL</span>,
+    numerodocumento  <span class="typ">BIGINT</span>       <span class="kw2">NOT NULL UNIQUE</span>,
+    tipodocumento    <span class="typ">VARCHAR(45)</span>  <span class="kw2">NOT NULL</span>,
+    correo           <span class="typ">VARCHAR(45)</span>  <span class="kw2">NOT NULL UNIQUE</span>,
+    contrasena       <span class="typ">VARCHAR(255)</span> <span class="kw2">NOT NULL</span>,
+    telefono         <span class="typ">BIGINT</span>       <span class="kw2">NULL</span>,
+    direccion        <span class="typ">VARCHAR(45)</span>  <span class="kw2">NULL</span>,
+    ciudad           <span class="typ">VARCHAR(45)</span>  <span class="kw2">NULL</span>,
+    estadodecuenta   <span class="typ">VARCHAR(45)</span>  <span class="kw2">NOT NULL DEFAULT</span> <span class="str">'Activo'</span>,
+    fecharegisto     <span class="typ">DATE</span>         <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_usuario_tipodocumento</span> <span class="kw2">CHECK</span> (tipodocumento <span class="kw2">IN</span> (<span class="str">'CC'</span>,<span class="str">'TI'</span>,<span class="str">'CE'</span>,<span class="str">'PA'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_usuario_contrasena</span>    <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(contrasena) &gt;= <span class="num">8</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_usuario_correo</span>        <span class="kw2">CHECK</span> (correo <span class="kw2">LIKE</span> <span class="str">'%_@__%.__%'</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_usuario_estadocuenta</span>  <span class="kw2">CHECK</span> (estadodecuenta <span class="kw2">IN</span> (<span class="str">'Activo'</span>,<span class="str">'Inactivo'</span>,<span class="str">'Suspendido'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_usuario_fecharegisto</span>  <span class="kw2">CHECK</span> (fecharegisto &gt;= <span class="str">'2000-01-01'</span> <span class="kw2">AND</span> fecharegisto &lt;= <span class="fn">CURRENT_DATE</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">usuarios</span>.roles (
+    idroles    <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    nombrerol  <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL UNIQUE</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_rol_nombre</span> <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(nombrerol)) &gt;= <span class="num">2</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">usuarios</span>.roles_has_usuarios (
+    roles_idroles       <span class="typ">INT</span> <span class="kw2">NOT NULL</span>,
+    usuarios_idusuarios <span class="typ">INT</span> <span class="kw2">NOT NULL</span>,
+    <span class="kw2">PRIMARY KEY</span> (roles_idroles, usuarios_idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_rhu_rol</span>     <span class="kw2">FOREIGN KEY</span> (roles_idroles)       <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.roles    (idroles),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_rhu_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios (idusuarios)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">usuarios</span>.notificaciones (
+    idnotificaciones    <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    mensaje             <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    fechaenvio          <span class="typ">DATE</span>        <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+    usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_notif_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios (idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_notif_fecha</span>   <span class="kw2">CHECK</span> (fechaenvio &gt;= <span class="str">'2000-01-01'</span> <span class="kw2">AND</span> fechaenvio &lt;= <span class="fn">CURRENT_DATE</span>)
+);</pre>
+
+    <!-- coordinacion -->
+<pre><span class="com">-- ─── 🔴 MÓDULO COORDINACIÓN ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">coordinacion</span>.coordinadores (
+    idcoordinadores     <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    arearesponsable     <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL UNIQUE</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_coord_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios (idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_coord_area</span>    <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(arearesponsable)) &gt;= <span class="num">3</span>)
+);</pre>
+
+    <!-- donaciones -->
+<pre><span class="com">-- ─── 🟢 MÓDULO DONACIONES ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.donante (
+    idinvitados         <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    propositodonacion   <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_donante_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios (idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_donante_prop</span>    <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(propositodonacion)) &gt;= <span class="num">3</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.donaciones (
+    iddonaciones        <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    fechadonacion       <span class="typ">DATE</span>        <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+    monto               <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    estadopago          <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL DEFAULT</span> <span class="str">'Pendiente'</span>,
+    metodopago          <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    anonima             <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL DEFAULT</span> <span class="str">'No'</span>,
+    usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    donante_idinvitados <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_don_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios  (idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_don_donante</span> <span class="kw2">FOREIGN KEY</span> (donante_idinvitados) <span class="kw2">REFERENCES</span> <span class="sc">donaciones</span>.donante (idinvitados),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_don_monto</span>   <span class="kw2">CHECK</span> (monto &gt; <span class="num">0</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_don_estado</span>  <span class="kw2">CHECK</span> (estadopago <span class="kw2">IN</span> (<span class="str">'Pendiente'</span>,<span class="str">'Confirmada'</span>,<span class="str">'Rechazada'</span>,<span class="str">'Anulada'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_don_anonima</span> <span class="kw2">CHECK</span> (anonima <span class="kw2">IN</span> (<span class="str">'Si'</span>,<span class="str">'No'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_don_metodo</span>  <span class="kw2">CHECK</span> (metodopago <span class="kw2">IN</span> (<span class="str">'Efectivo'</span>,<span class="str">'Transferencia'</span>,<span class="str">'Tarjeta Débito'</span>,<span class="str">'Tarjeta Crédito'</span>,<span class="str">'PSE'</span>,<span class="str">'Nequi'</span>,<span class="str">'Daviplata'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_don_fecha</span>   <span class="kw2">CHECK</span> (fechadonacion &gt;= <span class="str">'2000-01-01'</span> <span class="kw2">AND</span> fechadonacion &lt;= <span class="fn">CURRENT_DATE</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.detalle_donacion (
+    idhistorialdonaciones   <span class="typ">SERIAL</span> <span class="kw2">PRIMARY KEY</span>,
+    fechaderegistro         <span class="typ">DATE</span>   <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+    totaldonado             <span class="typ">INT</span>    <span class="kw2">NOT NULL</span>,
+    donaciones_iddonaciones <span class="typ">INT</span>    <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_det_donacion</span> <span class="kw2">FOREIGN KEY</span> (donaciones_iddonaciones) <span class="kw2">REFERENCES</span> <span class="sc">donaciones</span>.donaciones (iddonaciones),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_det_total</span>    <span class="kw2">CHECK</span> (totaldonado &gt;= <span class="num">0</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_det_fecha</span>    <span class="kw2">CHECK</span> (fechaderegistro &gt;= <span class="str">'2000-01-01'</span> <span class="kw2">AND</span> fechaderegistro &lt;= <span class="fn">CURRENT_DATE</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.comprobantes (
+    idcomprobantes          <span class="typ">SERIAL</span> <span class="kw2">PRIMARY KEY</span>,
+    codigocomprobante       <span class="typ">INT</span>    <span class="kw2">NOT NULL UNIQUE</span>,
+    fechaexpedicion         <span class="typ">DATE</span>   <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+    donaciones_iddonaciones <span class="typ">INT</span>    <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_comp_donacion</span> <span class="kw2">FOREIGN KEY</span> (donaciones_iddonaciones) <span class="kw2">REFERENCES</span> <span class="sc">donaciones</span>.donaciones (iddonaciones),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_comp_fecha</span>    <span class="kw2">CHECK</span> (fechaexpedicion &gt;= <span class="str">'2000-01-01'</span> <span class="kw2">AND</span> fechaexpedicion &lt;= <span class="fn">CURRENT_DATE</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.metodo_pago (
+    idmetodo_pago <span class="typ">SERIAL</span> <span class="kw2">PRIMARY KEY</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">donaciones</span>.donaciones_has_metodo_pago (
+    donaciones_iddonaciones <span class="typ">INT</span> <span class="kw2">NOT NULL</span>,
+    metodo_pago_idmetodo    <span class="typ">INT</span> <span class="kw2">NOT NULL</span>,
+    <span class="kw2">PRIMARY KEY</span> (donaciones_iddonaciones, metodo_pago_idmetodo),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_dhmp_donacion</span> <span class="kw2">FOREIGN KEY</span> (donaciones_iddonaciones) <span class="kw2">REFERENCES</span> <span class="sc">donaciones</span>.donaciones (iddonaciones),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_dhmp_metodo</span>   <span class="kw2">FOREIGN KEY</span> (metodo_pago_idmetodo)   <span class="kw2">REFERENCES</span> <span class="sc">donaciones</span>.metodo_pago (idmetodo_pago)
+);</pre>
+
+    <!-- voluntariado -->
+<pre><span class="com">-- ─── 🔵 MÓDULO VOLUNTARIADO ───</span>
+
+<span class="kw">CREATE TABLE</span> <span class="sc">voluntariado</span>.voluntarios (
+    idvoluntarios           <span class="typ">SERIAL</span> <span class="kw2">PRIMARY KEY</span>,
+    usuarios_idusuarios     <span class="typ">INT</span>    <span class="kw2">NOT NULL UNIQUE</span>,
+    usuarios_idusuarios_ref <span class="typ">INT</span>    <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_vol_usuario</span> <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios) <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios (idusuarios)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">voluntariado</span>.actividades (
+    idactividades             <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    nombreactividad           <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    descripcion               <span class="typ">VARCHAR(45)</span> <span class="kw2">NULL</span>,
+    fechainicio               <span class="typ">DATE</span>        <span class="kw2">NOT NULL</span>,
+    fechafin                  <span class="typ">DATE</span>        <span class="kw2">NULL</span>,
+    ubicaciones_idubicaciones <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_act_ubicacion</span>   <span class="kw2">FOREIGN KEY</span> (ubicaciones_idubicaciones) <span class="kw2">REFERENCES</span> <span class="sc">ubicaciones</span>.ubicaciones (idubicaciones),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_act_nombre</span>      <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(nombreactividad)) &gt;= <span class="num">3</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_act_fechainicio</span> <span class="kw2">CHECK</span> (fechainicio &gt;= <span class="str">'2000-01-01'</span>),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_act_fechafin</span>    <span class="kw2">CHECK</span> (fechafin <span class="kw2">IS NULL OR</span> fechafin &gt;= fechainicio)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">voluntariado</span>.postulaciones (
+    idpostulaciones                 <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    fechapostulacion                <span class="typ">DATE</span>        <span class="kw2">NOT NULL DEFAULT</span> <span class="fn">CURRENT_DATE</span>,
+    estadopostulacion               <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL DEFAULT</span> <span class="str">'Pendiente'</span>,
+    comentario                      <span class="typ">VARCHAR(45)</span> <span class="kw2">NULL</span>,
+    diasespera                      <span class="typ">INT</span>         <span class="kw2">NULL</span>,
+    voluntarios_idvoluntarios       <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    voluntarios_usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    usuarios_idusuarios             <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    actividades_idactividades       <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_post_voluntario</span> <span class="kw2">FOREIGN KEY</span> (voluntarios_idvoluntarios) <span class="kw2">REFERENCES</span> <span class="sc">voluntariado</span>.voluntarios (idvoluntarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_post_usuario</span>    <span class="kw2">FOREIGN KEY</span> (usuarios_idusuarios)       <span class="kw2">REFERENCES</span> <span class="sc">usuarios</span>.usuarios       (idusuarios),
+    <span class="kw2">CONSTRAINT</span> <span class="con">fk_post_actividad</span>  <span class="kw2">FOREIGN KEY</span> (actividades_idactividades)  <span class="kw2">REFERENCES</span> <span class="sc">voluntariado</span>.actividades  (idactividades),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_post_estado</span>     <span class="kw2">CHECK</span> (estadopostulacion <span class="kw2">IN</span> (<span class="str">'Pendiente'</span>,<span class="str">'Aprobada'</span>,<span class="str">'Rechazada'</span>)),
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_post_diasespera</span> <span class="kw2">CHECK</span> (diasespera &gt;= <span class="num">0</span>)
+);
+
+<span class="kw">CREATE TABLE</span> <span class="sc">voluntariado</span>.certificados (
+    idcertificados                  <span class="typ">SERIAL</span>      <span class="kw2">PRIMARY KEY</span>,
+    nombrevoluntario                <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    actividadasociada               <span class="typ">VARCHAR(45)</span> <span class="kw2">NOT NULL</span>,
+    voluntarios_idvoluntarios       <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    voluntarios_usuarios_idusuarios <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    usuarios_idusuarios             <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    actividades_idactividades       <span class="typ">INT</span>         <span class="kw2">NOT NULL</span>,
+    <span class="kw2">CONSTRAINT</span> <span class="con">ck_cert_nombre</span> <span class="kw2">CHECK</span> (<span class="fn">LENGTH</span>(<span class="fn">TRIM</span>(nombrevoluntario)) &gt;= <span class="num">2</span>)
+);</pre>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       3. ÍNDICES
+  ════════════════════════════════════════════════ -->
+  <div class="section" id="indices">
+    <div class="section-header">
+      <div class="section-icon icon-teal">⚡</div>
+      <span class="section-title">3. Índices</span>
+    </div>
+<pre><span class="com">-- ubicaciones</span>
+<span class="kw">CREATE INDEX</span> ix_ubic_nombre      <span class="kw2">ON</span> <span class="sc">ubicaciones</span>.ubicaciones (nombreubicacion);
+
+<span class="com">-- usuarios</span>
+<span class="kw">CREATE INDEX</span> ix_usu_correo       <span class="kw2">ON</span> <span class="sc">usuarios</span>.usuarios (correo);
+<span class="kw">CREATE INDEX</span> ix_usu_documento    <span class="kw2">ON</span> <span class="sc">usuarios</span>.usuarios (numerodocumento);
+<span class="kw">CREATE INDEX</span> ix_usu_estado       <span class="kw2">ON</span> <span class="sc">usuarios</span>.usuarios (estadodecuenta) <span class="kw2">INCLUDE</span> (idusuarios, nombrecompleto);
+<span class="kw">CREATE INDEX</span> ix_usu_fecharegisto <span class="kw2">ON</span> <span class="sc">usuarios</span>.usuarios (fecharegisto <span class="kw2">DESC</span>);
+<span class="kw">CREATE INDEX</span> ix_notif_usuario    <span class="kw2">ON</span> <span class="sc">usuarios</span>.notificaciones (usuarios_idusuarios) <span class="kw2">INCLUDE</span> (fechaenvio);
+
+<span class="com">-- voluntariado</span>
+<span class="kw">CREATE INDEX</span> ix_act_nombre       <span class="kw2">ON</span> <span class="sc">voluntariado</span>.actividades (nombreactividad);
+<span class="kw">CREATE INDEX</span> ix_act_fechainicio  <span class="kw2">ON</span> <span class="sc">voluntariado</span>.actividades (fechainicio <span class="kw2">DESC</span>) <span class="kw2">INCLUDE</span> (nombreactividad);
+<span class="kw">CREATE INDEX</span> ix_post_estado      <span class="kw2">ON</span> <span class="sc">voluntariado</span>.postulaciones (estadopostulacion) <span class="kw2">WHERE</span> estadopostulacion = <span class="str">'Pendiente'</span>;
+
+<span class="com">-- donaciones</span>
+<span class="kw">CREATE INDEX</span> ix_don_fecha        <span class="kw2">ON</span> <span class="sc">donaciones</span>.donaciones (fechadonacion <span class="kw2">DESC</span>) <span class="kw2">INCLUDE</span> (monto, estadopago);
+<span class="kw">CREATE INDEX</span> ix_don_estado       <span class="kw2">ON</span> <span class="sc">donaciones</span>.donaciones (estadopago) <span class="kw2">INCLUDE</span> (iddonaciones, monto);
+<span class="kw">CREATE INDEX</span> ix_don_monto        <span class="kw2">ON</span> <span class="sc">donaciones</span>.donaciones (monto <span class="kw2">DESC</span>);
+
+<span class="com">-- seguridad</span>
+<span class="kw">CREATE INDEX</span> ix_aud_fecha        <span class="kw2">ON</span> <span class="sc">seguridad</span>.auditoria (fecha <span class="kw2">DESC</span>);
+<span class="kw">CREATE INDEX</span> ix_aud_tabla        <span class="kw2">ON</span> <span class="sc">seguridad</span>.auditoria (tabla) <span class="kw2">INCLUDE</span> (accion, fecha);
+<span class="kw">CREATE INDEX</span> ix_aud_usuario      <span class="kw2">ON</span> <span class="sc">seguridad</span>.auditoria (idusuario) <span class="kw2">INCLUDE</span> (fecha, accion);</pre>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DATOS INICIALES — SECCIÓN 4 a 17
+  ════════════════════════════════════════════════ -->
+
+  <!-- 4. Ubicaciones -->
+  <div class="section" id="ins-ubicaciones">
+    <div class="section-header">
+      <div class="section-icon icon-teal">🟣</div>
+      <span class="section-title">4. Datos iniciales — Ubicaciones</span>
+      <span class="section-sub">ubicaciones.ubicaciones · 10 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">ubicaciones</span>.ubicaciones (idubicaciones, nombreubicacion, direccionubicacion, cuposdisponibles) <span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'Sede Central Fundapp'</span>,          <span class="str">'Calle 10 # 5-23, Bogotá'</span>,          <span class="str">'100'</span>),
+(<span class="num">2</span>,  <span class="str">'Centro Comunitario Norte'</span>,      <span class="str">'Carrera 15 # 80-12, Bogotá'</span>,       <span class="str">'50'</span>),
+(<span class="num">3</span>,  <span class="str">'Salón Parroquial Sur'</span>,          <span class="str">'Calle 50 Sur # 20-10, Bogotá'</span>,     <span class="str">'30'</span>),
+(<span class="num">4</span>,  <span class="str">'Biblioteca Pública Central'</span>,    <span class="str">'Carrera 7 # 11-01, Bogotá'</span>,        <span class="str">'40'</span>),
+(<span class="num">5</span>,  <span class="str">'Polideportivo El Tunal'</span>,        <span class="str">'Av. Boyacá # 56-05, Bogotá'</span>,       <span class="str">'200'</span>),
+(<span class="num">6</span>,  <span class="str">'Colegio San Francisco'</span>,         <span class="str">'Calle 68 # 10-40, Bogotá'</span>,         <span class="str">'80'</span>),
+(<span class="num">7</span>,  <span class="str">'Centro de Salud La Candelaria'</span>, <span class="str">'Calle 8 # 3-50, Bogotá'</span>,           <span class="str">'25'</span>),
+(<span class="num">8</span>,  <span class="str">'Parque El Virrey'</span>,              <span class="str">'Calle 90 # 15-00, Bogotá'</span>,         <span class="str">'300'</span>),
+(<span class="num">9</span>,  <span class="str">'Casa de la Cultura Usaquén'</span>,    <span class="str">'Calle 119 # 6-42, Bogotá'</span>,         <span class="str">'60'</span>),
+(<span class="num">10</span>, <span class="str">'Sede Virtual (Online)'</span>,          <span class="str">'https://meet.fundapp.org'</span>,         <span class="str">'500'</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'ubicaciones.ubicaciones_idubicaciones_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idubicaciones) <span class="kw2">FROM</span> <span class="sc">ubicaciones</span>.ubicaciones));</pre>
+  </div>
+
+  <!-- 5. Roles -->
+  <div class="section" id="ins-roles">
+    <div class="section-header">
+      <div class="section-icon icon-yellow">🟡</div>
+      <span class="section-title">5. Datos iniciales — Roles</span>
+      <span class="section-sub">usuarios.roles · 32 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">usuarios</span>.roles (idroles, nombrerol) <span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'Administrador General'</span>),
+(<span class="num">2</span>,  <span class="str">'Director Ejecutivo'</span>),
+(<span class="num">3</span>,  <span class="str">'Coordinador de Voluntariado'</span>),
+(<span class="num">4</span>,  <span class="str">'Director de Donaciones'</span>),
+(<span class="num">5</span>,  <span class="str">'Coordinador de Recursos Humanos'</span>),
+(<span class="num">6</span>,  <span class="str">'Gestor de Proyectos'</span>),
+(<span class="num">7</span>,  <span class="str">'Analista de IT'</span>),
+(<span class="num">8</span>,  <span class="str">'Especialista en Ciberseguridad'</span>),
+(<span class="num">9</span>,  <span class="str">'Auditor Interno'</span>),
+(<span class="num">10</span>, <span class="str">'Contador Senior'</span>),
+(<span class="num">11</span>, <span class="str">'Asistente de Contabilidad'</span>),
+(<span class="num">12</span>, <span class="str">'Secretario Administrativo'</span>),
+(<span class="num">13</span>, <span class="str">'Relacionista Público'</span>),
+(<span class="num">14</span>, <span class="str">'Director de Comunicación'</span>),
+(<span class="num">15</span>, <span class="str">'Coordinador Jurídico'</span>),
+(<span class="num">16</span>, <span class="str">'Médico General'</span>),
+(<span class="num">17</span>, <span class="str">'Enfermero Jefe'</span>),
+(<span class="num">18</span>, <span class="str">'Psicólogo Comunitario'</span>),
+(<span class="num">19</span>, <span class="str">'Trabajador Social'</span>),
+(<span class="num">20</span>, <span class="str">'Nutricionista Jefe'</span>),
+(<span class="num">21</span>, <span class="str">'Profesor de Matemáticas'</span>),
+(<span class="num">22</span>, <span class="str">'Instructor de Inglés'</span>),
+(<span class="num">23</span>, <span class="str">'Tallerista de Artes'</span>),
+(<span class="num">24</span>, <span class="str">'Monitor de Deportes'</span>),
+(<span class="num">25</span>, <span class="str">'Bibliotecario Jefe'</span>),
+(<span class="num">26</span>, <span class="str">'Jefe de Logística'</span>),
+(<span class="num">27</span>, <span class="str">'Supervisor de Bodega'</span>),
+(<span class="num">28</span>, <span class="str">'Cocinero Jefe'</span>),
+(<span class="num">29</span>, <span class="str">'Técnico de Soporte PC'</span>),
+(<span class="num">30</span>, <span class="str">'Diseñador Gráfico Social'</span>),
+(<span class="num">31</span>, <span class="str">'Voluntario General'</span>),
+(<span class="num">32</span>, <span class="str">'Donante Externo'</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'usuarios.roles_idroles_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idroles) <span class="kw2">FROM</span> <span class="sc">usuarios</span>.roles));</pre>
+  </div>
+
+  <!-- 6. Usuarios -->
+  <div class="section" id="ins-usuarios">
+    <div class="section-header">
+      <div class="section-icon icon-yellow">🟡</div>
+      <span class="section-title">6. Datos iniciales — Usuarios</span>
+      <span class="section-sub">usuarios.usuarios · 20 registros · contraseña de prueba: "12345678"</span>
+    </div>
+<pre><span class="com">-- Hash SHA-256 de "12345678":
+-- ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f</span>
+
+<span class="kw">INSERT INTO</span> <span class="sc">usuarios</span>.usuarios
+    (idusuarios, nombrecompleto, numerodocumento, tipodocumento, correo,
+     contrasena, telefono, direccion, ciudad, estadodecuenta, fecharegisto)
+<span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'Juan Felipe Gonzalez'</span>,     <span class="num">100001</span>, <span class="str">'CC'</span>, <span class="str">'juan.gonzalez@fundapp.org'</span>,    <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110001</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-01'</span>),
+(<span class="num">2</span>,  <span class="str">'Maria Camila Rodriguez'</span>,   <span class="num">100002</span>, <span class="str">'CC'</span>, <span class="str">'maria.rodriguez@fundapp.org'</span>,  <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110002</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-02'</span>),
+(<span class="num">3</span>,  <span class="str">'Carlos Andres Martinez'</span>,   <span class="num">100003</span>, <span class="str">'CC'</span>, <span class="str">'carlos.martinez@fundapp.org'</span>,  <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110003</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-03'</span>),
+(<span class="num">4</span>,  <span class="str">'Luisa Fernanda Garcia'</span>,    <span class="num">100004</span>, <span class="str">'CC'</span>, <span class="str">'luisa.garcia@fundapp.org'</span>,     <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110004</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-04'</span>),
+(<span class="num">5</span>,  <span class="str">'David Santiago Hernandez'</span>, <span class="num">100005</span>, <span class="str">'CC'</span>, <span class="str">'david.hernandez@fundapp.org'</span>,  <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110005</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-05'</span>),
+(<span class="num">6</span>,  <span class="str">'Daniela Alejandra Torres'</span>, <span class="num">100006</span>, <span class="str">'CC'</span>, <span class="str">'daniela.torres@fundapp.org'</span>,   <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110006</span>, <span class="kw2">NULL</span>, <span class="str">'Medellín'</span>, <span class="str">'Activo'</span>, <span class="str">'2026-01-06'</span>),
+(<span class="num">7</span>,  <span class="str">'Andres Felipe Ramirez'</span>,    <span class="num">100007</span>, <span class="str">'CC'</span>, <span class="str">'andres.ramirez@fundapp.org'</span>,   <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110007</span>, <span class="kw2">NULL</span>, <span class="str">'Cali'</span>,     <span class="str">'Activo'</span>, <span class="str">'2026-01-07'</span>),
+(<span class="num">8</span>,  <span class="str">'Paula Andrea Vargas'</span>,      <span class="num">100008</span>, <span class="str">'CC'</span>, <span class="str">'paula.vargas@fundapp.org'</span>,     <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110008</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-08'</span>),
+(<span class="num">9</span>,  <span class="str">'Jorge Luis Rojas'</span>,         <span class="num">100009</span>, <span class="str">'CC'</span>, <span class="str">'jorge.rojas@fundapp.org'</span>,      <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110009</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-09'</span>),
+(<span class="num">10</span>, <span class="str">'Valentina Sofia Diaz'</span>,     <span class="num">100010</span>, <span class="str">'CC'</span>, <span class="str">'valentina.diaz@fundapp.org'</span>,   <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110010</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-10'</span>),
+(<span class="num">11</span>, <span class="str">'Jhon Alexander Vera'</span>,      <span class="num">100011</span>, <span class="str">'CC'</span>, <span class="str">'jhon.vera@fundapp.org'</span>,        <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110011</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-11'</span>),
+(<span class="num">12</span>, <span class="str">'Carolina Andrea Molina'</span>,   <span class="num">100012</span>, <span class="str">'CC'</span>, <span class="str">'carolina.molina@fundapp.org'</span>,  <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110012</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-12'</span>),
+(<span class="num">13</span>, <span class="str">'Kevin Santiago Suarez'</span>,    <span class="num">100013</span>, <span class="str">'CC'</span>, <span class="str">'kevin.suarez@fundapp.org'</span>,     <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110013</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-13'</span>),
+(<span class="num">14</span>, <span class="str">'Angela Maria Torres'</span>,      <span class="num">100014</span>, <span class="str">'CC'</span>, <span class="str">'angela.torres@fundapp.org'</span>,    <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110014</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-14'</span>),
+(<span class="num">15</span>, <span class="str">'Cristian David Ramos'</span>,     <span class="num">100015</span>, <span class="str">'CC'</span>, <span class="str">'cristian.ramos@fundapp.org'</span>,   <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110015</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-15'</span>),
+(<span class="num">16</span>, <span class="str">'Tatiana Paola Jimenez'</span>,    <span class="num">100016</span>, <span class="str">'CC'</span>, <span class="str">'tatiana.jimenez@fundapp.org'</span>,  <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110016</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-16'</span>),
+(<span class="num">17</span>, <span class="str">'Fernando Jose Herrera'</span>,    <span class="num">100017</span>, <span class="str">'CC'</span>, <span class="str">'fernando.herrera@fundapp.org'</span>, <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110017</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-17'</span>),
+(<span class="num">18</span>, <span class="str">'Melissa Alejandra Cortes'</span>, <span class="num">100018</span>, <span class="str">'CC'</span>, <span class="str">'melissa.cortes@fundapp.org'</span>,   <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110018</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-18'</span>),
+(<span class="num">19</span>, <span class="str">'Luis Eduardo Rincon'</span>,      <span class="num">100019</span>, <span class="str">'CC'</span>, <span class="str">'luis.rincon@fundapp.org'</span>,      <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110019</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-19'</span>),
+(<span class="num">20</span>, <span class="str">'Monica Viviana Medina'</span>,    <span class="num">100020</span>, <span class="str">'CC'</span>, <span class="str">'monica.medina@fundapp.org'</span>,    <span class="str">'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f'</span>, <span class="num">3001110020</span>, <span class="kw2">NULL</span>, <span class="str">'Bogotá'</span>,   <span class="str">'Activo'</span>, <span class="str">'2026-01-20'</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'usuarios.usuarios_idusuarios_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idusuarios) <span class="kw2">FROM</span> <span class="sc">usuarios</span>.usuarios));</pre>
+  </div>
+
+  <!-- 7. Roles × Usuarios -->
+  <div class="section" id="ins-roles-usuarios">
+    <div class="section-header">
+      <div class="section-icon icon-yellow">🟡</div>
+      <span class="section-title">7. Datos iniciales — Roles × Usuarios</span>
+      <span class="section-sub">usuarios.roles_has_usuarios · 20 registros</span>
+    </div>
+<pre><span class="com">-- Usuarios 1–10: roles especializados (1–10)
+-- Usuarios 11–20: Voluntario General (rol 31)</span>
+
+<span class="kw">INSERT INTO</span> <span class="sc">usuarios</span>.roles_has_usuarios (roles_idroles, usuarios_idusuarios) <span class="kw2">VALUES</span>
+(<span class="num">1</span>,<span class="num">1</span>),(<span class="num">2</span>,<span class="num">2</span>),(<span class="num">3</span>,<span class="num">3</span>),(<span class="num">4</span>,<span class="num">4</span>),(<span class="num">5</span>,<span class="num">5</span>),
+(<span class="num">6</span>,<span class="num">6</span>),(<span class="num">7</span>,<span class="num">7</span>),(<span class="num">8</span>,<span class="num">8</span>),(<span class="num">9</span>,<span class="num">9</span>),(<span class="num">10</span>,<span class="num">10</span>),
+(<span class="num">31</span>,<span class="num">11</span>),(<span class="num">31</span>,<span class="num">12</span>),(<span class="num">31</span>,<span class="num">13</span>),(<span class="num">31</span>,<span class="num">14</span>),(<span class="num">31</span>,<span class="num">15</span>),
+(<span class="num">31</span>,<span class="num">16</span>),(<span class="num">31</span>,<span class="num">17</span>),(<span class="num">31</span>,<span class="num">18</span>),(<span class="num">31</span>,<span class="num">19</span>),(<span class="num">31</span>,<span class="num">20</span>);</pre>
+  </div>
+
+  <!-- 8. Coordinadores -->
+  <div class="section" id="ins-coordinadores">
+    <div class="section-header">
+      <div class="section-icon icon-red">🔴</div>
+      <span class="section-title">8. Datos iniciales — Coordinadores</span>
+      <span class="section-sub">coordinacion.coordinadores · 5 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">coordinacion</span>.coordinadores (idcoordinadores, arearesponsable, usuarios_idusuarios) <span class="kw2">VALUES</span>
+(<span class="num">1</span>, <span class="str">'Voluntariado y Actividades'</span>, <span class="num">1</span>),
+(<span class="num">2</span>, <span class="str">'Donaciones y Recaudo'</span>,       <span class="num">2</span>),
+(<span class="num">3</span>, <span class="str">'Recursos Humanos'</span>,           <span class="num">3</span>),
+(<span class="num">4</span>, <span class="str">'Salud Comunitaria'</span>,          <span class="num">4</span>),
+(<span class="num">5</span>, <span class="str">'Educación y Formación'</span>,      <span class="num">5</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'coordinacion.coordinadores_idcoordinadores_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idcoordinadores) <span class="kw2">FROM</span> <span class="sc">coordinacion</span>.coordinadores));</pre>
+  </div>
+
+  <!-- 9. Actividades -->
+  <div class="section" id="ins-actividades">
+    <div class="section-header">
+      <div class="section-icon icon-purple">🔵</div>
+      <span class="section-title">9. Datos iniciales — Actividades</span>
+      <span class="section-sub">voluntariado.actividades · 30 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">voluntariado</span>.actividades
+    (idactividades, nombreactividad, descripcion, fechainicio, fechafin, ubicaciones_idubicaciones)
+<span class="kw2">VALUES</span>
+<span class="com">-- Educación (1–10)</span>
+(<span class="num">1</span>,  <span class="str">'Taller de Lectura Infantil'</span>,     <span class="str">'Refuerzo escolar para niños de primaria'</span>,         <span class="str">'2026-01-10'</span>, <span class="str">'2026-01-15'</span>, <span class="num">4</span>),
+(<span class="num">2</span>,  <span class="str">'Clases de Inglés Básico'</span>,        <span class="str">'Nivel inicial para jóvenes de la comunidad'</span>,       <span class="str">'2026-01-20'</span>, <span class="str">'2026-02-20'</span>, <span class="num">6</span>),
+(<span class="num">3</span>,  <span class="str">'Curso de Alfabetización Digital'</span>, <span class="str">'Enseñanza de herramientas básicas de PC'</span>,          <span class="str">'2026-02-01'</span>, <span class="str">'2026-03-01'</span>, <span class="num">10</span>),
+(<span class="num">4</span>,  <span class="str">'Taller de Pintura y Óleo'</span>,       <span class="str">'Expresión artística para adolescentes'</span>,            <span class="str">'2026-02-15'</span>, <span class="str">'2026-02-28'</span>, <span class="num">9</span>),
+(<span class="num">5</span>,  <span class="str">'Refuerzo Matemático'</span>,            <span class="str">'Apoyo en álgebra para secundaria'</span>,                 <span class="str">'2026-03-05'</span>, <span class="str">'2026-03-20'</span>, <span class="num">6</span>),
+(<span class="num">6</span>,  <span class="str">'Charla Orientación Vocacional'</span>,  <span class="str">'Guía para bachilleres de último año'</span>,              <span class="str">'2026-03-10'</span>, <span class="str">'2026-03-10'</span>, <span class="num">1</span>),
+(<span class="num">7</span>,  <span class="str">'Taller de Robótica Junior'</span>,      <span class="str">'Introducción a la programación con bloques'</span>,       <span class="str">'2026-03-15'</span>, <span class="str">'2026-04-15'</span>, <span class="num">10</span>),
+(<span class="num">8</span>,  <span class="str">'Escuela de Padres'</span>,              <span class="str">'Técnicas de crianza positiva'</span>,                     <span class="str">'2026-03-20'</span>, <span class="str">'2026-03-22'</span>, <span class="num">1</span>),
+(<span class="num">9</span>,  <span class="str">'Club de Ajedrez'</span>,                <span class="str">'Torneo y clases estratégicas'</span>,                     <span class="str">'2026-04-01'</span>, <span class="str">'2026-05-01'</span>, <span class="num">4</span>),
+(<span class="num">10</span>, <span class="str">'Taller de Escritura Creativa'</span>,   <span class="str">'Creación de cuentos y poemas'</span>,                    <span class="str">'2026-04-05'</span>, <span class="str">'2026-04-25'</span>, <span class="num">4</span>),
+<span class="com">-- Alimentación (11–20)</span>
+(<span class="num">11</span>, <span class="str">'Comedor Comunitario'</span>,            <span class="str">'Preparación de almuerzos para adultos mayores'</span>,    <span class="str">'2026-02-02'</span>, <span class="str">'2026-02-02'</span>, <span class="num">3</span>),
+(<span class="num">12</span>, <span class="str">'Entrega de Mercados Sector A'</span>,   <span class="str">'Distribución de kits alimentarios'</span>,                <span class="str">'2026-02-10'</span>, <span class="str">'2026-02-10'</span>, <span class="num">1</span>),
+(<span class="num">13</span>, <span class="str">'Campaña Contra el Hambre'</span>,       <span class="str">'Recolección de granos no perecederos'</span>,             <span class="str">'2026-02-20'</span>, <span class="str">'2026-02-25'</span>, <span class="num">1</span>),
+(<span class="num">14</span>, <span class="str">'Taller de Cocina Saludable'</span>,     <span class="str">'Preparación de menús económicos y nutritivos'</span>,     <span class="str">'2026-03-01'</span>, <span class="str">'2026-03-01'</span>, <span class="num">3</span>),
+(<span class="num">15</span>, <span class="str">'Desayuno Solidario Infantil'</span>,    <span class="str">'Atención nutricional a niños en riesgo'</span>,           <span class="str">'2026-03-07'</span>, <span class="str">'2026-03-07'</span>, <span class="num">3</span>),
+(<span class="num">16</span>, <span class="str">'Banco de Alimentos Jornada 1'</span>,   <span class="str">'Clasificación de donaciones recibidas'</span>,            <span class="str">'2026-03-12'</span>, <span class="str">'2026-03-12'</span>, <span class="num">1</span>),
+(<span class="num">17</span>, <span class="str">'Huerta Urbana Comunitaria'</span>,      <span class="str">'Siembra de hortalizas en el patio central'</span>,        <span class="str">'2026-03-18'</span>, <span class="str">'2026-06-18'</span>, <span class="num">8</span>),
+(<span class="num">18</span>, <span class="str">'Jornada de Panadería Social'</span>,    <span class="str">'Producción de pan para familias vulnerables'</span>,      <span class="str">'2026-03-25'</span>, <span class="str">'2026-03-25'</span>, <span class="num">3</span>),
+(<span class="num">19</span>, <span class="str">'Cena Benéfica Anual'</span>,            <span class="str">'Recaudación de fondos para el comedor'</span>,            <span class="str">'2026-04-10'</span>, <span class="str">'2026-04-10'</span>, <span class="num">5</span>),
+(<span class="num">20</span>, <span class="str">'Charla de Nutrición Materna'</span>,    <span class="str">'Guía para madres gestantes'</span>,                      <span class="str">'2026-04-15'</span>, <span class="str">'2026-04-15'</span>, <span class="num">7</span>),
+<span class="com">-- Salud (21–30)</span>
+(<span class="num">21</span>, <span class="str">'Brigada de Salud Oral'</span>,          <span class="str">'Limpieza y revisión dental gratuita'</span>,              <span class="str">'2026-01-15'</span>, <span class="str">'2026-01-15'</span>, <span class="num">7</span>),
+(<span class="num">22</span>, <span class="str">'Jornada de Vacunación'</span>,          <span class="str">'Apoyo logístico en esquema nacional'</span>,              <span class="str">'2026-02-05'</span>, <span class="str">'2026-02-05'</span>, <span class="num">7</span>),
+(<span class="num">23</span>, <span class="str">'Taller Manejo del Estrés'</span>,       <span class="str">'Técnicas de relajación para cuidadores'</span>,           <span class="str">'2026-02-22'</span>, <span class="str">'2026-02-22'</span>, <span class="num">2</span>),
+(<span class="num">24</span>, <span class="str">'Campaña Donación de Sangre'</span>,     <span class="str">'Coordinación con el banco de sangre local'</span>,        <span class="str">'2026-03-02'</span>, <span class="str">'2026-03-02'</span>, <span class="num">7</span>),
+(<span class="num">25</span>, <span class="str">'Zumbatón Solidario'</span>,             <span class="str">'Actividad física para recaudar fondos'</span>,            <span class="str">'2026-03-08'</span>, <span class="str">'2026-03-08'</span>, <span class="num">5</span>),
+(<span class="num">26</span>, <span class="str">'Charla Prevención Diabetes'</span>,     <span class="str">'Detección temprana y hábitos sanos'</span>,               <span class="str">'2026-03-14'</span>, <span class="str">'2026-03-14'</span>, <span class="num">2</span>),
+(<span class="num">27</span>, <span class="str">'Brigada Optométrica'</span>,            <span class="str">'Examen visual para niños'</span>,                         <span class="str">'2026-03-21'</span>, <span class="str">'2026-03-21'</span>, <span class="num">7</span>),
+(<span class="num">28</span>, <span class="str">'Taller Primeros Auxilios'</span>,       <span class="str">'Capacitación básica para la comunidad'</span>,            <span class="str">'2026-03-28'</span>, <span class="str">'2026-03-29'</span>, <span class="num">1</span>),
+(<span class="num">29</span>, <span class="str">'Jornada Salud Mental'</span>,           <span class="str">'Asesoría psicológica individual breve'</span>,            <span class="str">'2026-04-04'</span>, <span class="str">'2026-04-04'</span>, <span class="num">2</span>),
+(<span class="num">30</span>, <span class="str">'Feria de Vida Saludable'</span>,        <span class="str">'Stand de información y chequeos rápidos'</span>,          <span class="str">'2026-04-20'</span>, <span class="str">'2026-04-20'</span>, <span class="num">5</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'voluntariado.actividades_idactividades_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idactividades) <span class="kw2">FROM</span> <span class="sc">voluntariado</span>.actividades));</pre>
+  </div>
+
+  <!-- 10. Voluntarios -->
+  <div class="section" id="ins-voluntarios">
+    <div class="section-header">
+      <div class="section-icon icon-purple">🔵</div>
+      <span class="section-title">10. Datos iniciales — Voluntarios</span>
+      <span class="section-sub">voluntariado.voluntarios · 10 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">voluntariado</span>.voluntarios (idvoluntarios, usuarios_idusuarios, usuarios_idusuarios_ref) <span class="kw2">VALUES</span>
+(<span class="num">1</span>,<span class="num">11</span>,<span class="num">11</span>),(<span class="num">2</span>,<span class="num">12</span>,<span class="num">12</span>),(<span class="num">3</span>,<span class="num">13</span>,<span class="num">13</span>),(<span class="num">4</span>,<span class="num">14</span>,<span class="num">14</span>),(<span class="num">5</span>,<span class="num">15</span>,<span class="num">15</span>),
+(<span class="num">6</span>,<span class="num">16</span>,<span class="num">16</span>),(<span class="num">7</span>,<span class="num">17</span>,<span class="num">17</span>),(<span class="num">8</span>,<span class="num">18</span>,<span class="num">18</span>),(<span class="num">9</span>,<span class="num">19</span>,<span class="num">19</span>),(<span class="num">10</span>,<span class="num">20</span>,<span class="num">20</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'voluntariado.voluntarios_idvoluntarios_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idvoluntarios) <span class="kw2">FROM</span> <span class="sc">voluntariado</span>.voluntarios));</pre>
+  </div>
+
+  <!-- 11. Métodos de Pago -->
+  <div class="section" id="ins-metodo-pago">
+    <div class="section-header">
+      <div class="section-icon icon-green">🟢</div>
+      <span class="section-title">11. Datos iniciales — Métodos de Pago</span>
+      <span class="section-sub">donaciones.metodo_pago · 7 registros</span>
+    </div>
+<pre><span class="com">-- IDs: 1=Efectivo, 2=Transferencia, 3=Tarjeta Débito,
+--       4=Tarjeta Crédito, 5=PSE, 6=Nequi, 7=Daviplata</span>
+
+<span class="kw">INSERT INTO</span> <span class="sc">donaciones</span>.metodo_pago (idmetodo_pago) <span class="kw2">VALUES</span>
+(<span class="num">1</span>),(<span class="num">2</span>),(<span class="num">3</span>),(<span class="num">4</span>),(<span class="num">5</span>),(<span class="num">6</span>),(<span class="num">7</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'donaciones.metodo_pago_idmetodo_pago_seq'</span>, <span class="num">7</span>);</pre>
+  </div>
+
+  <!-- 12. Donantes -->
+  <div class="section" id="ins-donante">
+    <div class="section-header">
+      <div class="section-icon icon-green">🟢</div>
+      <span class="section-title">12. Datos iniciales — Donantes</span>
+      <span class="section-sub">donaciones.donante · 10 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">donaciones</span>.donante (idinvitados, propositodonacion, usuarios_idusuarios) <span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'Apoyo a programas educativos'</span>,    <span class="num">1</span>),
+(<span class="num">2</span>,  <span class="str">'Contribución al comedor social'</span>,  <span class="num">2</span>),
+(<span class="num">3</span>,  <span class="str">'Donación voluntaria general'</span>,     <span class="num">3</span>),
+(<span class="num">4</span>,  <span class="str">'Apoyo a brigadas de salud'</span>,       <span class="num">4</span>),
+(<span class="num">5</span>,  <span class="str">'Patrocinio de actividades'</span>,       <span class="num">5</span>),
+(<span class="num">6</span>,  <span class="str">'Donación anónima'</span>,               <span class="num">6</span>),
+(<span class="num">7</span>,  <span class="str">'Apoyo a jóvenes vulnerables'</span>,     <span class="num">7</span>),
+(<span class="num">8</span>,  <span class="str">'Contribución alimentaria'</span>,        <span class="num">8</span>),
+(<span class="num">9</span>,  <span class="str">'Donación voluntaria general'</span>,     <span class="num">9</span>),
+(<span class="num">10</span>, <span class="str">'Apoyo a programas de deporte'</span>,   <span class="num">10</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'donaciones.donante_idinvitados_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idinvitados) <span class="kw2">FROM</span> <span class="sc">donaciones</span>.donante));</pre>
+  </div>
+
+  <!-- 13. Donaciones -->
+  <div class="section" id="ins-donaciones">
+    <div class="section-header">
+      <div class="section-icon icon-green">🟢</div>
+      <span class="section-title">13. Datos iniciales — Donaciones</span>
+      <span class="section-sub">donaciones.donaciones · 15 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">donaciones</span>.donaciones
+    (iddonaciones, fechadonacion, monto, estadopago, metodopago, anonima,
+     usuarios_idusuarios, donante_idinvitados)
+<span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'2026-01-15'</span>, <span class="num">246</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Efectivo'</span>,        <span class="str">'No'</span>, <span class="num">1</span>,  <span class="num">1</span>),
+(<span class="num">2</span>,  <span class="str">'2026-01-18'</span>, <span class="num">493</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Transferencia'</span>,   <span class="str">'No'</span>, <span class="num">2</span>,  <span class="num">2</span>),
+(<span class="num">3</span>,  <span class="str">'2026-01-20'</span>, <span class="num">159</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Efectivo'</span>,        <span class="str">'No'</span>, <span class="num">3</span>,  <span class="num">3</span>),
+(<span class="num">4</span>,  <span class="str">'2026-01-22'</span>, <span class="num">516</span>,   <span class="str">'Confirmada'</span>, <span class="str">'PSE'</span>,             <span class="str">'No'</span>, <span class="num">4</span>,  <span class="num">4</span>),
+(<span class="num">5</span>,  <span class="str">'2026-01-25'</span>, <span class="num">415</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Nequi'</span>,           <span class="str">'No'</span>, <span class="num">5</span>,  <span class="num">5</span>),
+(<span class="num">6</span>,  <span class="str">'2026-01-28'</span>, <span class="num">329</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Efectivo'</span>,        <span class="str">'Si'</span>, <span class="num">6</span>,  <span class="num">6</span>),
+(<span class="num">7</span>,  <span class="str">'2026-02-01'</span>, <span class="num">417</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Tarjeta Crédito'</span>, <span class="str">'No'</span>, <span class="num">7</span>,  <span class="num">7</span>),
+(<span class="num">8</span>,  <span class="str">'2026-02-03'</span>, <span class="num">552</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Daviplata'</span>,       <span class="str">'No'</span>, <span class="num">8</span>,  <span class="num">8</span>),
+(<span class="num">9</span>,  <span class="str">'2026-02-05'</span>, <span class="num">219</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Efectivo'</span>,        <span class="str">'No'</span>, <span class="num">9</span>,  <span class="num">9</span>),
+(<span class="num">10</span>, <span class="str">'2026-02-08'</span>, <span class="num">493</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Transferencia'</span>,   <span class="str">'No'</span>, <span class="num">10</span>, <span class="num">10</span>),
+(<span class="num">11</span>, <span class="str">'2026-02-10'</span>, <span class="num">122</span>,   <span class="str">'Pendiente'</span>,  <span class="str">'Efectivo'</span>,        <span class="str">'No'</span>, <span class="num">1</span>,  <span class="num">1</span>),
+(<span class="num">12</span>, <span class="str">'2026-02-12'</span>, <span class="num">493</span>,   <span class="str">'Pendiente'</span>,  <span class="str">'PSE'</span>,             <span class="str">'No'</span>, <span class="num">2</span>,  <span class="num">2</span>),
+(<span class="num">13</span>, <span class="str">'2026-02-14'</span>, <span class="num">245</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Nequi'</span>,           <span class="str">'Si'</span>, <span class="num">3</span>,  <span class="num">3</span>),
+(<span class="num">14</span>, <span class="str">'2026-02-16'</span>, <span class="num">141</span>,   <span class="str">'Confirmada'</span>, <span class="str">'Efectivo'</span>,        <span class="str">'No'</span>, <span class="num">4</span>,  <span class="num">4</span>),
+(<span class="num">15</span>, <span class="str">'2026-02-18'</span>, <span class="num">50000</span>, <span class="str">'Confirmada'</span>, <span class="str">'PSE'</span>,             <span class="str">'No'</span>, <span class="num">5</span>,  <span class="num">5</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'donaciones.donaciones_iddonaciones_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(iddonaciones) <span class="kw2">FROM</span> <span class="sc">donaciones</span>.donaciones));</pre>
+  </div>
+
+  <!-- 14. Postulaciones -->
+  <div class="section" id="ins-postulaciones">
+    <div class="section-header">
+      <div class="section-icon icon-purple">🔵</div>
+      <span class="section-title">14. Datos iniciales — Postulaciones</span>
+      <span class="section-sub">voluntariado.postulaciones · 10 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">voluntariado</span>.postulaciones
+    (idpostulaciones, fechapostulacion, estadopostulacion, comentario,
+     diasespera, voluntarios_idvoluntarios, voluntarios_usuarios_idusuarios,
+     usuarios_idusuarios, actividades_idactividades)
+<span class="kw2">VALUES</span>
+(<span class="num">1</span>,  <span class="str">'2026-01-12'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Interesado en apoyar lectura'</span>,       <span class="num">0</span>, <span class="num">1</span>,  <span class="num">11</span>, <span class="num">11</span>, <span class="num">1</span>),
+(<span class="num">2</span>,  <span class="str">'2026-01-21'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Con experiencia en inglés'</span>,           <span class="num">0</span>, <span class="num">2</span>,  <span class="num">12</span>, <span class="num">12</span>, <span class="num">2</span>),
+(<span class="num">3</span>,  <span class="str">'2026-02-02'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Docente universitario de sistemas'</span>,   <span class="num">0</span>, <span class="num">3</span>,  <span class="num">13</span>, <span class="num">13</span>, <span class="num">3</span>),
+(<span class="num">4</span>,  <span class="str">'2026-02-16'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Artista plástica'</span>,                    <span class="num">0</span>, <span class="num">4</span>,  <span class="num">14</span>, <span class="num">14</span>, <span class="num">4</span>),
+(<span class="num">5</span>,  <span class="str">'2026-03-06'</span>, <span class="str">'Pendiente'</span>, <span class="str">'Estudiante de matemáticas'</span>,           <span class="num">2</span>, <span class="num">5</span>,  <span class="num">15</span>, <span class="num">15</span>, <span class="num">5</span>),
+(<span class="num">6</span>,  <span class="str">'2026-03-08'</span>, <span class="str">'Pendiente'</span>, <span class="str">'Orientador educativo'</span>,                <span class="num">1</span>, <span class="num">6</span>,  <span class="num">16</span>, <span class="num">16</span>, <span class="num">6</span>),
+(<span class="num">7</span>,  <span class="str">'2026-03-16'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Ingeniero de sistemas'</span>,               <span class="num">0</span>, <span class="num">7</span>,  <span class="num">17</span>, <span class="num">17</span>, <span class="num">7</span>),
+(<span class="num">8</span>,  <span class="str">'2026-03-21'</span>, <span class="str">'Aprobada'</span>,  <span class="str">'Psicóloga familiar'</span>,                  <span class="num">0</span>, <span class="num">8</span>,  <span class="num">18</span>, <span class="num">18</span>, <span class="num">8</span>),
+(<span class="num">9</span>,  <span class="str">'2026-03-20'</span>, <span class="str">'Rechazada'</span>, <span class="str">'Sin disponibilidad confirmada'</span>,        <span class="num">5</span>, <span class="num">9</span>,  <span class="num">19</span>, <span class="num">19</span>, <span class="num">9</span>),
+(<span class="num">10</span>, <span class="str">'2026-03-25'</span>, <span class="str">'Pendiente'</span>, <span class="str">'Escritora independiente'</span>,             <span class="num">3</span>, <span class="num">10</span>, <span class="num">20</span>, <span class="num">20</span>, <span class="num">10</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'voluntariado.postulaciones_idpostulaciones_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idpostulaciones) <span class="kw2">FROM</span> <span class="sc">voluntariado</span>.postulaciones));</pre>
+  </div>
+
+  <!-- 15. Certificados -->
+  <div class="section" id="ins-certificados">
+    <div class="section-header">
+      <div class="section-icon icon-purple">🔵</div>
+      <span class="section-title">15. Datos iniciales — Certificados</span>
+      <span class="section-sub">voluntariado.certificados · 6 registros (solo postulaciones Aprobadas)</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">voluntariado</span>.certificados
+    (idcertificados, nombrevoluntario, actividadasociada,
+     voluntarios_idvoluntarios, voluntarios_usuarios_idusuarios,
+     usuarios_idusuarios, actividades_idactividades)
+<span class="kw2">VALUES</span>
+(<span class="num">1</span>, <span class="str">'Jhon Alexander Vera'</span>,      <span class="str">'Taller de Lectura Infantil'</span>,     <span class="num">1</span>,  <span class="num">11</span>, <span class="num">11</span>, <span class="num">1</span>),
+(<span class="num">2</span>, <span class="str">'Carolina Andrea Molina'</span>,   <span class="str">'Clases de Inglés Básico'</span>,        <span class="num">2</span>,  <span class="num">12</span>, <span class="num">12</span>, <span class="num">2</span>),
+(<span class="num">3</span>, <span class="str">'Kevin Santiago Suarez'</span>,    <span class="str">'Curso de Alfabetización Digital'</span>, <span class="num">3</span>,  <span class="num">13</span>, <span class="num">13</span>, <span class="num">3</span>),
+(<span class="num">4</span>, <span class="str">'Angela Maria Torres'</span>,      <span class="str">'Taller de Pintura y Óleo'</span>,       <span class="num">4</span>,  <span class="num">14</span>, <span class="num">14</span>, <span class="num">4</span>),
+(<span class="num">7</span>, <span class="str">'Fernando Jose Herrera'</span>,    <span class="str">'Taller de Robótica Junior'</span>,       <span class="num">7</span>,  <span class="num">17</span>, <span class="num">17</span>, <span class="num">7</span>),
+(<span class="num">8</span>, <span class="str">'Melissa Alejandra Cortes'</span>, <span class="str">'Escuela de Padres'</span>,               <span class="num">8</span>,  <span class="num">18</span>, <span class="num">18</span>, <span class="num">8</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'voluntariado.certificados_idcertificados_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idcertificados) <span class="kw2">FROM</span> <span class="sc">voluntariado</span>.certificados));</pre>
+  </div>
+
+  <!-- 16. Notificaciones -->
+  <div class="section" id="ins-notificaciones">
+    <div class="section-header">
+      <div class="section-icon icon-yellow">🟡</div>
+      <span class="section-title">16. Datos iniciales — Notificaciones</span>
+      <span class="section-sub">usuarios.notificaciones · 7 registros</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">usuarios</span>.notificaciones (idnotificaciones, mensaje, fechaenvio, usuarios_idusuarios) <span class="kw2">VALUES</span>
+(<span class="num">1</span>, <span class="str">'Bienvenido a Fundapp'</span>,                 <span class="str">'2026-01-01'</span>, <span class="num">1</span>),
+(<span class="num">2</span>, <span class="str">'Tu postulación fue aprobada'</span>,          <span class="str">'2026-01-12'</span>, <span class="num">11</span>),
+(<span class="num">3</span>, <span class="str">'Recuerda tu actividad del 20 enero'</span>,   <span class="str">'2026-01-18'</span>, <span class="num">12</span>),
+(<span class="num">4</span>, <span class="str">'Certificado disponible para descarga'</span>, <span class="str">'2026-02-02'</span>, <span class="num">13</span>),
+(<span class="num">5</span>, <span class="str">'Nueva actividad disponible'</span>,           <span class="str">'2026-03-01'</span>, <span class="num">14</span>),
+(<span class="num">6</span>, <span class="str">'Donación confirmada, gracias!'</span>,        <span class="str">'2026-01-16'</span>, <span class="num">1</span>),
+(<span class="num">7</span>, <span class="str">'Tu donación está en revisión'</span>,         <span class="str">'2026-02-11'</span>, <span class="num">1</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'usuarios.notificaciones_idnotificaciones_seq'</span>,
+       (<span class="kw">SELECT</span> <span class="fn">MAX</span>(idnotificaciones) <span class="kw2">FROM</span> <span class="sc">usuarios</span>.notificaciones));</pre>
+  </div>
+
+  <!-- 17. Auditoría -->
+  <div class="section" id="ins-auditoria">
+    <div class="section-header">
+      <div class="section-icon icon-gray">🔒</div>
+      <span class="section-title">17. Datos iniciales — Auditoría</span>
+      <span class="section-sub">seguridad.auditoria · registro inicial del sistema</span>
+    </div>
+<pre><span class="kw">INSERT INTO</span> <span class="sc">seguridad</span>.auditoria (idusuario, accion, esquema, tabla, fecha, descripcion)
+<span class="kw2">VALUES</span> (<span class="kw2">NULL</span>, <span class="str">'INSERT'</span>, <span class="str">'seguridad'</span>, <span class="str">'auditoria'</span>, <span class="fn">NOW</span>(), <span class="str">'Registro inicial del sistema FUNDAPP v5.1'</span>);
+
+<span class="kw">SELECT</span> <span class="fn">SETVAL</span>(<span class="str">'seguridad.auditoria_idauditoria_seq'</span>, <span class="num">1</span>);</pre>
+  </div>
+
+</main>
+
+<footer>FUNDAPP — Script DDL + Datos Iniciales v5.1 | Para Supabase (PostgreSQL) — Solo consultas DDL e INSERT</footer>
+
+</body>
+</html>
